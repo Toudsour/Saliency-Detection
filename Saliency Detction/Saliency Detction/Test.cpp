@@ -1,14 +1,16 @@
-#include<opencv.hpp>
-#include<imgproc.hpp>
-using namespace cv;
+#include "HeadFile.h"
+#include "PicPath.h"
+char FileName[MAXPATHLEN];
+
 int main()
 {
-	Mat srcImage = imread("F://1.jpg");
-	imshow("SrcP",srcImage);
-	Mat element = getStructuringElement(MORPH_RECT,Size(4,4));
-	Mat dstImage;
-	erode(srcImage,dstImage,element);
-	imshow("DstImage",dstImage);
-	waitKey(0);	
+	//GetPic 
+	for(int FileNode=1;FileNode<=MAXPIC;FileNode++)
+	{
+		sprintf(FileName,"%s%d.jpg",IMGSAIM,FileNode);
+		printf("%s\n",FileName);
+		Mat srcImage=imread(FileName);
+		imshow("Pic",srcImage);
+	}
 	return 0;
 }
