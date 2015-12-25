@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HeadFile.h" />
+    <ClInclude Include="spams.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0ECD8F60-5669-40FB-8382-6E264C8A1E1B}</ProjectGuid>
@@ -48,6 +49,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>F:\GitHub\Saliency-Detection\Saliency Detction\Saliency Detction\spams\prox;F:\GitHub\Saliency-Detection\Saliency Detction\Saliency Detction\spams\linalg;F:\GitHub\Saliency-Detection\Saliency Detction\Saliency Detction\spams\dictLearn;F:\GitHub\Saliency-Detection\Saliency Detction\Saliency Detction\spams\decomp;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -60,6 +62,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>F:\GitHub\Saliency-Detection\Saliency Detction\Saliency Detction\spams;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

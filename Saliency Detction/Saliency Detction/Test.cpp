@@ -5,14 +5,15 @@ Mat RGBImage;
 Mat LABImage;
 int main()
 {
-	//GetPic 
 	for(int FileNode=1;FileNode<=MAXPIC;FileNode++)
 	{
+		//GetPic
 		sprintf(FileName,"%s%d.jpg",IMGSAIM,FileNode);
 		RGBImage=imread(FileName);
-		imshow("RGB",RGBImage);
+		//imshow("RGB",RGBImage);
 		cvtColor(RGBImage,LABImage,COLOR_BGR2Lab);
-		imshow("LAB",LABImage);
+		//imshow("LAB",LABImage);
+		
 		waitKey(0);
 	}
 	return 0;
