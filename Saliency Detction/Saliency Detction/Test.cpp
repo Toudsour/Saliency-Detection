@@ -13,12 +13,15 @@ int main()
 	{
 		
 		//GetPic
+		Mat SourceImage;
 		Mat RGBImage;
 		Mat LABImage;
 		sprintf(FileName,"%s%d.jpg",IMGSAIM,FileNode);  //get filename
-		RGBImage=imread(FileName);						//load picture from file
+		SourceImage=imread(FileName);						//load picture from file
+		resize(SourceImage,RGBImage,Size(PICSIZE,PICSIZE),0,0,INTER_LINEAR);
 		cvtColor(RGBImage,LABImage,COLOR_BGR2Lab);		//translate RGB into Lab
 		imshow("Source",RGBImage);
+
 
 		Matrix<double> RGBCannels[3];
 		Matrix<double> LabCanenls[3];
@@ -49,10 +52,15 @@ int main()
 			SplitCannel(RGBImage,Cannels[0],Cannels[1],Cannels[2]);	//Split Picture into R,G,B cannel
 
 
+			//Image into Row
+			for(int i=0;i<3;i++)
+				ImageToCol(Cannels[i],PATCHSIZE,PATCHSIZE);
+
+
 			//Represent picture by sparse coding
 			for(int Can=0;Can<3;Can++)
-				lasso(Cannels[Can],*Dic,Sparsecode[Can],sparam);
-			
+				lasso(Cannels[Can],*Dic,Sparsecode[Can],sparam);	
+				
 		}
 		waitKey(0);
 	}
