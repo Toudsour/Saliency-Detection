@@ -1,6 +1,9 @@
 #include <opencv.hpp>
+#include <cstdio>
 #include "spams.h"
 using namespace cv;
+
+
 void SplitCannel(Mat& SouceImg,Matrix<double>& A,Matrix<double>& B,Matrix<double>& C)
 {
 	int Row=SouceImg.rows;
@@ -32,18 +35,44 @@ void SplitCannel(Mat& SouceImg,Matrix<double>& A,Matrix<double>& B,Matrix<double
 	}
 }     
 
-void GetLearningDictionary(Matrix<double>& RGBDic,Matrix<double>& LabDic)
+
+void GetLearningDictionary(Matrix<double>* RGBDic,Matrix<double>* LABDic)
 {
-	double *Data;
-	Data=new double[64*200];
-	//double point,row,col
-	RGBDic.setData(Data,64,200);
-	RGBDic.setAleat();
-	RGBDic.normalize();
-	Data=new double [64*200];
-	LabDic.setData(Data,64,200);
-	LabDic.setAleat();
-	LabDic.normalize();
+	FILE * DictionFile;
+	DictionFile=NULL;
+	int Row,Col;
+	DictionFile=fopen("DSRGB.dat","r");
+	if(DictionFile!=NULL)
+	{
+		fscanf(DictionFile,"%d %d",&Row,&Col);
+		for(int Can=0;Can<3;Can++)
+		{
+			double *Data=new double[Row*Col];
+			for(int i=0;i<Row;i++)
+				for(int j=0;j<Col;j++)
+					fscanf(DictionFile,"%lf",&Data[i*Col+j]);
+			RGBDic[Can].setData(Data,Row,Col);
+		}
+		fclose(DictionFile);
+	}
+	else 
+		printf("NO DSRGB.dat!\n");
+	DictionFile=fopen("DSLAB.dat","r");
+	if(DictionFile!=NULL)
+	{
+		fscanf(DictionFile,"%d %d",&Row,&Col);
+		for(int Can=0;Can<3;Can++)
+		{
+			double *Data=new double[Row*Col]; 
+			for(int i=0;i<Row;i++)
+				for(int j=0;j<Col;j++)
+					fscanf(DictionFile,"%lf",&Data[i*Col+j]);
+			LABDic[Can].setData(Data,Row,Col);
+		}
+		fclose(DictionFile);
+	}
+	else 
+		printf("NO DSLAB.dat!\n");
 }
 template <typename T>
 void lasso(const Matrix<T>& X,const Matrix<T> &D,SpMatrix<T>& spalpha,Sparam sparam)
@@ -94,3 +123,140 @@ void ImageToCol(Matrix<double>& Input,int R,int C)
 	Input.setData(Data,OutRow,OutCol);
 }
 
+
+//Attention: This function is correct only when it's called inverse to ImageToCol
+void ColToImage(Matrix<double>& Input,int R,int C,int OutRow,int OutCol)
+{
+	int Row=Input.m();
+	int Col=Input.n();
+	int SourceIndex;
+	int DestIndex;
+	int DestRow;
+	int DestCol;
+	int BlockIndex;
+	int BlockRow;
+	int BlockCol;
+	int InBlockIndex;
+	int InBlockRow;
+	int InBlockCol;
+	int ColBlcokNum=OutCol/C+OutCol%C?1:0;
+	int ColLen=ColBlcokNum*C;
+	double *Temp=new double[Row*Col];
+	double *Data=new double[OutRow*OutCol];
+	for(int i=0;i<Row;i++)
+		for(int j=0;j<Col;j++)
+		{
+			SourceIndex=i*Col+j;
+			BlockIndex=j;
+			BlockCol=j%ColBlcokNum;
+			BlockRow=j/ColBlcokNum;
+			InBlockIndex=i;
+			InBlockCol=i%C;
+			InBlockRow=i/C;
+			DestRow=BlockRow*R+InBlockRow;
+			DestCol=BlockCol*C+InBlockCol;
+			DestIndex=DestRow*ColLen+DestCol;
+			Temp[DestIndex]=Input[SourceIndex];
+		}
+		//Cut
+		for(int i=0;i<OutRow;i++)
+			for(int j=0;j<OutCol;j++)
+			{
+				SourceIndex=i*ColLen+j;
+				DestIndex=i*OutCol+j;
+				Data[DestIndex]=Temp[SourceIndex];
+			}
+		delete Temp;
+		Input.clear();
+		Input.setData(Data,OutRow,OutCol);
+}
+template<class T>
+T*** GetThridMatrix(int Row,int Col,int Size,T Type)
+{
+	T*** Output;
+	Output=new T**[Row];
+	for(int i=0;i<Row;i++)
+		Output[i]=new T*[Col];
+	for(int i=0;i<Row;i++)
+		for(int j=0;j<Col;j++)
+			Output[i][j]=new T[Size];
+	return Output;
+}
+
+
+
+template<class T>
+void DeleteThridMatrix(int Size,int Row,int Col,T*** P)
+{
+	for(int i=0;i<Row;i++)
+		for(int j=0;j<Col;j++)
+			delete(P[i][j]);
+	for(int i=0;i<Row;i++)
+		delete(P[i]);
+	delete(P);
+}
+
+
+
+double*** Reshape(Matrix<double>& Input,int Size,int Row,int Col)
+{
+	const double *Data=Input.X();
+	double ***Output;
+	Output=GetThridMatrix(Row,Col,Size,1.0);
+	int InputRow=Input.m();
+	int InputCol=Input.n();
+	int PathCol=Col;
+	int DestRow;
+	int DestCol;
+	for(int i=0;i<InputRow;i++)
+		for(int j=0;j<InputCol;j++)
+		{
+			DestRow=j/Col;
+			DestCol=j%Col;
+			Output[DestRow][DestCol][i]=Data[i*InputCol+j];
+		}
+	return Output;
+}
+
+
+
+double Average(double *A,double *B,int Len)
+{
+	double Sum=0;
+	for(int i=0;i<Len;i++)
+		Sum+=abs(A[i]-B[i]);
+	Sum/=Len;
+	return Sum;
+}
+
+double FindMatrixMax(const Matrix<double>& Input)
+{
+	double Max=DBL_MIN;
+	int Count=Input.m()*Input.n();
+	for(int i=0;i<Count;i++)
+		Max=max(Input[i],Max);
+	return Max;
+}
+
+double FindMatrixMin(const Matrix<double>& Input)
+{
+	double Min=DBL_MAX;
+	int Count=Input.m()*Input.n();
+	for(int i=0;i<Count;i++)
+		Min=min(Input[i],Min);
+	return Min;
+}
+
+void MatrixSubConst(Matrix<double>& Input,double Const)
+{
+	int Count=Input.m()*Input.n();
+	for(int i=0;i<Count;i++)
+		Input[i]-=Const;
+}
+void MatrixDivConst(Matrix<double>& Input,double Const)
+{
+	int Count=Input.m()*Input.n();
+	for(int i=0;i<Count;i++)
+		Input[i]/=Const;
+}
+ 

@@ -1,11 +1,12 @@
 #include "HeadFile.h"
 char FileName[MAXPATHLEN];
-Matrix<double> LabDic;
-Matrix<double> RGBDic;
+Matrix<double> LabDic[3];
+Matrix<double> RGBDic[3];
 int main()
 {
 	//Get Learning Dictionary 
 	GetLearningDictionary(RGBDic,LabDic);
+	//LabDic[0].print("OK?");
 	
 
 	//Do Saliency Detection
@@ -37,13 +38,13 @@ int main()
 			if(ColorSpace==1)
 			{
 				Cannels=RGBCannels;
-				Dic=&RGBDic;
+				Dic=RGBDic;
 				Sparsecode=SPRGB;
 			}
 			else 
 			{
 				Cannels=LabCanenls;
-				Dic=&LabDic;
+				Dic=LabDic;
 				Sparsecode=SPLab;
 			}
 			
@@ -52,14 +53,32 @@ int main()
 			SplitCannel(RGBImage,Cannels[0],Cannels[1],Cannels[2]);	//Split Picture into R,G,B cannel
 
 
-			//Image into Row
-			for(int i=0;i<3;i++)
-				ImageToCol(Cannels[i],PATCHSIZE,PATCHSIZE);
-
-
-			//Represent picture by sparse coding
+			
 			for(int Can=0;Can<3;Can++)
-				lasso(Cannels[Can],*Dic,Sparsecode[Can],sparam);	
+			{
+				//Image into Row
+				ImageToCol(Cannels[Can],PATCHSIZE,PATCHSIZE);
+
+
+				//Represent picture by sparse coding 
+				Matrix<double> Result;
+				lasso(Cannels[Can],Dic[Can],Sparsecode[Can],sparam);
+				Dic->mult(Sparsecode[Can],Result);
+				
+
+				//Result into Image
+				ColToImage(Result,PATCHSIZE,PATCHSIZE,PICSIZE,PICSIZE);
+			}
+
+			for(int Can=0;Can<3;Can++)
+			{
+
+			
+			
+			
+			}
+
+			
 				
 		}
 		waitKey(0);

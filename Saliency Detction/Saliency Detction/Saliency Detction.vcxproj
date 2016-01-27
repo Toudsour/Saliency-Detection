@@ -15,6 +15,7 @@
     <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core.h" />
     <ClInclude Include="DataStruct.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="HeadFile.h" />

@@ -11,6 +11,7 @@
 #include "Setting.h"
 #include "DataStruct.h"
 #include "Function.h"
+#include "Core.h"
 
 using namespace cv;
 using namespace std;
