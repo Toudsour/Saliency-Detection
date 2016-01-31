@@ -33,7 +33,21 @@ void SplitCannel(Mat& SouceImg,Matrix<double>& A,Matrix<double>& B,Matrix<double
 				C.setData(Cannel,Row,Col);
 		}
 	}
-}     
+}   
+void MatrixtoMat(Matrix<double>& Input,Mat& Output)
+{
+	int Row=Output.rows;
+	int Col=Output.cols;
+	for(int i=0;i<Row;i++)
+	{
+		uchar *Data=Output.ptr<uchar>(i);
+		for(int j=0;j<Col;j++)
+		{
+			Data[j]=((uchar)(256*Input[i*Row+j]));
+			printf("%d %lf\n",(int)Data[j],Input[i*Row+j]);
+		}
+	}
+}
 
 
 void GetLearningDictionary(Matrix<double>* RGBDic,Matrix<double>* LABDic)

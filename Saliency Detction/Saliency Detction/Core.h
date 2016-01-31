@@ -1,15 +1,13 @@
-#include <opencv.hpp>
-#include "spams.h"
-#include "Function.h"
+
 using namespace cv;
 
-void LocalSailency(SpMatrix<double> & SparseMatrix)
+void LocalSailency(SpMatrix<double> & SparseMatrix, Matrix<double>& Local)
 {
 	Matrix<double> Temp;
 	SparseMatrix.toFull(Temp);
 	double ***Patches;
 	Patches=Reshape(Temp,200,PATCHLEN,PATCHLEN);
-	Matrix<double> Local(PATCHLEN,PATCHLEN);
+	Local.resize(PATCHLEN,PATCHLEN);
 	for(int i=0;i<PATCHLEN;i++)
 		for(int j=0;j<PATCHLEN;j++)
 		{
@@ -28,11 +26,9 @@ void LocalSailency(SpMatrix<double> & SparseMatrix)
 				 }
 			Local[i*PATCHLEN+j]=Sum;
 		}
-		MatrixSubConst(Local,FindMatrixMin(Local));
-		MatrixDivConst(Local,FindMatrixMax(Local));
-		
-
-
-
-
+}
+void Normalization(Matrix<double>& Input)
+{
+	MatrixSubConst(Input,FindMatrixMin(Input));
+	MatrixDivConst(Input,FindMatrixMax(Input));
 }
